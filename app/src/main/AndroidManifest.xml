@@ -7,6 +7,9 @@
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Required by Android's system uninstaller when requesting app removal. -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
     <!-- Only ask Android to expose apps that have a launcher entry. -->
     <queries>
         <intent>

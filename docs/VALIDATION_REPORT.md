@@ -1,7 +1,7 @@
-# Validation Report — RecentDock v0.8.3
+# Validation Report — RecentDock v0.8.4
 
 ## Source checks
-- Version: `0.8.3`, versionCode `43`.
+- Version: `0.8.4`, versionCode `44`.
 - Analytics clear operation still targets only the two analytics event tables.
 - Existing Star, Pin, Hidden and Custom Order stores are not referenced by clear-data code.
 - `LAST_USED` continues to use cached `RecentApp.lastUsedTime`; no new package scan was added.
@@ -15,7 +15,7 @@
 - A page with no second-row content hides row 2 so the remaining row stays vertically centered.
 - Runtime widget code references 38 `widget_*` IDs; all were found in `widget_recent_dock.xml`.
 - All 24 XML resource files parse successfully.
-- English / zh-TW / zh-CN string resources contain the same 127 keys.
+- English / zh-TW / zh-CN string resources contain the same 129 keys.
 - `WidgetLayoutPolicy.kt` was compiled directly with local `kotlinc` and an executable assertion harness passed.
 - Widget control broadcasts now reject IDs not returned by `AppWidgetManager` for the provider.
 
@@ -30,7 +30,7 @@
 
 ## Uninstall action checks
 - Library row overflow menu includes `Uninstall` / `解除安裝` / `卸载` in all three locales.
-- The action uses `Intent.ACTION_DELETE` with a `package:` URI; no `REQUEST_DELETE_PACKAGES`, `QUERY_ALL_PACKAGES`, shell command, or silent uninstall path was added.
+- The action uses `Intent.ACTION_DELETE` with a `package:` URI. The manifest now declares `REQUEST_DELETE_PACKAGES`, a normal permission automatically granted at install time and required by the system UninstallerActivity for modern target SDKs. System confirmation remains mandatory; no `QUERY_ALL_PACKAGES`, shell command, or silent uninstall path is added.
 - A pending uninstall flow bypasses the normal foreground-cache freshness early return once, so returning from Android's confirmation screen refreshes package state immediately.
 - Repository refresh already calls `retainInstalled()` for Starred, Pinned and Hidden stores; custom order is reconciled from refreshed category packages.
 - If the system uninstall intent cannot launch, the force-refresh flag is reset and an error Snackbar is shown.
@@ -38,9 +38,9 @@
 - `kotlinc` parser scan of `LibraryScreen.kt` reports Android/Compose unresolved references only and no `expecting`, `unclosed`, `unexpected tokens`, or syntax diagnostics.
 
 ## Gradle verification
-Attempted `./gradlew :app:testDebugUnitTest :app:assembleDebug` after the v0.8.3 uninstall-menu changes.
+Ran `gradlew.bat :app:testDebugUnitTest :app:assembleDebug` for v0.8.4 in the Windows/JDK 17/Android SDK 36 environment.
 
-Result: **not completed** because the sandbox cannot resolve `services.gradle.org`, so Gradle 9.3.1 cannot be downloaded. This report does not claim a successful Android build.
+Result: **BUILD SUCCESSFUL in 52s**. The unit-test reports contain **29 tests, 0 failures, 0 errors, and 0 skipped**. Both `:app:testDebugUnitTest` and `:app:assembleDebug` completed successfully. The merged Debug manifest also contains `android.permission.REQUEST_DELETE_PACKAGES`. No Android device was connected during this run, so the uninstall confirmation/cancel flow still requires on-device regression testing.
 
 ## Required local verification
 ```bash

@@ -36,3 +36,6 @@ Thumbs.db
 # Local backups and sync temporary files
 .tmp.driveupload/
 *.zip
+
+# Local staging note, not part of the public repository
+docs/README_SOURCE.md

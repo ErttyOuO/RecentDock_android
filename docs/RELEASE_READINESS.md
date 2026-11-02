@@ -1,6 +1,6 @@
-# RecentDock 0.8.3：GitHub 發佈檢查
+# RecentDock 0.8.4：GitHub 發佈檢查
 
-狀態：**source candidate；尚未完成 Android Gradle 建置與真機／多 Launcher 回歸測試，因此不建立正式 release tag。**
+狀態：**source candidate；v0.8.4 Gradle 建置與 29 項單元測試已通過，但尚未完成真機／多 Launcher 回歸測試，因此不建立正式 release tag。**
 
 ## 本次已處理
 
@@ -8,6 +8,7 @@
 - v0.8.1：RemoteViews Widget 支援依高度自動切換單排／雙排，常見寬度雙排最多 10 個 App／頁。
 - v0.8.2：List 長按加入按壓／星號特效與 Snackbar；Library 左右拖曳切換改成受控動畫；Analytics 時間線拖曳只在放開後查詢詳細統計。
 - v0.8.3：App 列表 `⋯` 選單新增系統解除安裝入口，返回後強制重新整理清單並清理已移除 package 的狀態。
+- v0.8.4：修正解除安裝權限缺漏，Manifest 新增 `REQUEST_DELETE_PACKAGES` normal 權限；系統確認畫面仍由 Android 管理。
 - 修正較窄雙排（2～4 欄）第二排 slot 錯位問題。
 - Widget picker 預覽、設定頁說明與雙排顯示邏輯同步。
 - Widget 控制廣播會先確認 widget ID 確實屬於目前 provider，再修改分類／頁碼狀態。
@@ -25,7 +26,7 @@
 
 | 優先 | 項目 | 依據與下一步 |
 | --- | --- | --- |
-| 發佈門檻 | Android 完整建置 | 目前環境無法解析 `services.gradle.org`，Gradle 9.3.1 無法下載。請在可連網的 Android Studio/JDK 17/SDK 36 環境執行 `:app:testDebugUnitTest :app:assembleDebug`。 |
+| 發佈門檻 | Android 完整建置 | v0.8.4 已在 Windows/JDK 17/SDK 36 環境成功執行 `:app:testDebugUnitTest :app:assembleDebug`；仍需在其他開發環境確認首次 Gradle 下載與同步。 |
 | 發佈門檻 | 真機 Widget 回歸 | AppWidget 的寬高回報由 Launcher 決定。至少用兩個 Launcher 驗證：新增預設尺寸、縮成單排、拉高雙排、2～5 欄、1～15 App、最後一頁不足一排、分類切換與翻頁。 |
 | 發佈門檻 | 公開權利與授權 | 確認 PNG 圖示來源與授權；決定程式碼 LICENSE。未定前不要把公開可見等同於已授權修改／再散布。 |
 | 發佈門檻 | Library 手勢／回饋真機驗證 | 驗證長按一秒的按壓縮放、震動、星號脈衝與 Snackbar；再測左右拖曳與垂直捲動、手動排序手勢是否互不干擾。 |
@@ -37,7 +38,7 @@
 
 ## 建議 GitHub 節奏
 
-1. 將 v0.8.3 source candidate 提交到候選分支，先跑 CI / 本機 `testDebugUnitTest` 與 `assembleDebug`。
+1. 將 v0.8.4 source candidate 提交到候選分支，先跑 CI / 本機 `testDebugUnitTest` 與 `assembleDebug`。
 2. 真機測試 Widget 單／雙排與所有寬度，再修正 Launcher 特例。
 3. 確認圖示授權、LICENSE、README 截圖與隱私說明後，再標記正式 tag。
 4. 若分享 APK，請從已驗證的同一 commit 產生並附 SHA-256 與測試裝置資訊。
@@ -45,7 +46,8 @@
 GitHub source 發佈與 Google Play 上架是不同流程；本文件只安排 source candidate 到正式 GitHub release 的門檻。
 
 
-## v0.8.3 uninstall verification
+## v0.8.4 uninstall verification
 - Library overflow menu launches Android's system uninstall confirmation using `ACTION_DELETE` + `package:` URI.
+- Manifest declares `REQUEST_DELETE_PACKAGES` (normal permission, auto-granted at install) as required by Android's UninstallerActivity for modern target SDKs.
 - Test both cancel and confirm paths on-device. Confirming should remove the row after returning; cancelling should leave it unchanged.
 - No silent-uninstall permission or package-wide query permission was added.
