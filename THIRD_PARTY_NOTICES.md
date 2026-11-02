@@ -95,5 +95,6 @@ This is a source-tree and dependency audit, not a proof that no code was ever ad
 - Kotlin Coroutines: https://github.com/Kotlin/kotlinx.coroutines
 - Material Icons: https://developers.google.com/fonts/docs/material_icons
 - JUnit 4: https://github.com/junit-team/junit4
+- Hamcrest: https://github.com/hamcrest/JavaHamcrest
 - Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
 - Eclipse Public License 1.0: https://www.eclipse.org/legal/epl-v10.html

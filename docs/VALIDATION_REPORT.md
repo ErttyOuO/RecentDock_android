@@ -40,7 +40,7 @@
 ## Gradle verification
 Ran `gradlew.bat :app:testDebugUnitTest :app:assembleDebug` for v0.8.4 in the Windows/JDK 17/Android SDK 36 environment.
 
-Result: **BUILD SUCCESSFUL in 52s**. The unit-test reports contain **29 tests, 0 failures, 0 errors, and 0 skipped**. Both `:app:testDebugUnitTest` and `:app:assembleDebug` completed successfully. The merged Debug manifest also contains `android.permission.REQUEST_DELETE_PACKAGES`. No Android device was connected during this run, so the uninstall confirmation/cancel flow still requires on-device regression testing.
+Result: **BUILD SUCCESSFUL in 1m 21s** from the prepared GitHub staging folder. The XML test reports contain **29 tests, 0 failures, 0 errors, and 0 skipped** (AnalyticsPeriodTest: 3; AppCategoryTest: 3; ManualAppOrderingTest: 3; WidgetLayoutPolicyTest: 20). Both `:app:testDebugUnitTest` and `:app:assembleDebug` completed successfully. The APK contains `assets/LICENSE`, `assets/THIRD_PARTY_NOTICES.md`, and the Apache-2.0, EPL-1.0 and BSD-3-Clause license texts. `local.properties` is ignored by Git. No Android device was connected during this run, so uninstall confirmation/cancel and widget behavior still require on-device regression testing.
 
 ## Third-party and source provenance review
 - Added repository MIT license for original RecentDock source code and project documentation.
