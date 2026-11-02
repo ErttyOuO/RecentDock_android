@@ -42,6 +42,15 @@ Ran `gradlew.bat :app:testDebugUnitTest :app:assembleDebug` for v0.8.4 in the Wi
 
 Result: **BUILD SUCCESSFUL in 52s**. The unit-test reports contain **29 tests, 0 failures, 0 errors, and 0 skipped**. Both `:app:testDebugUnitTest` and `:app:assembleDebug` completed successfully. The merged Debug manifest also contains `android.permission.REQUEST_DELETE_PACKAGES`. No Android device was connected during this run, so the uninstall confirmation/cancel flow still requires on-device regression testing.
 
+## Third-party and source provenance review
+- Added repository MIT license for original RecentDock source code and project documentation.
+- Added `THIRD_PARTY_NOTICES.md`, a copy of Apache License 2.0, and a copy of Eclipse Public License 1.0 and BSD 3-Clause for identified dependencies. The MIT license and notices are also copied into `app/src/main/assets/` so they are packaged into the APK; no in-app license viewer has been added.
+- Gradle runtime dependency graph was reviewed; the direct runtime libraries are AndroidX / Jetpack Compose / Material Icons, Kotlin Standard Library, and Kotlin Coroutines.
+- JUnit 4.13.2 is test-only and uses EPL-1.0; AndroidX Test / Espresso and Compose test/debug tooling are test/debug-only.
+- Material Icons and the two arrow-drop vector paths are documented as Apache-2.0 assets.
+- The source scan found no explicit third-party source-code URLs or copied-snippet attribution headers. This does not prove that no code was ever adapted from an uncredited tutorial or repository; the staging Git history does not preserve the complete original development history.
+- The two PNG app/widget artwork files have no embedded source/license metadata and remain excluded from the MIT grant pending owner confirmation.
+
 ## Required local verification
 ```bash
 ./gradlew :app:testDebugUnitTest

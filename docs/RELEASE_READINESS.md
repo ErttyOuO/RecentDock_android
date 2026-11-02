@@ -28,7 +28,7 @@
 | --- | --- | --- |
 | 發佈門檻 | Android 完整建置 | v0.8.4 已在 Windows/JDK 17/SDK 36 環境成功執行 `:app:testDebugUnitTest :app:assembleDebug`；仍需在其他開發環境確認首次 Gradle 下載與同步。 |
 | 發佈門檻 | 真機 Widget 回歸 | AppWidget 的寬高回報由 Launcher 決定。至少用兩個 Launcher 驗證：新增預設尺寸、縮成單排、拉高雙排、2～5 欄、1～15 App、最後一頁不足一排、分類切換與翻頁。 |
-| 發佈門檻 | 公開權利與授權 | 確認 PNG 圖示來源與授權；決定程式碼 LICENSE。未定前不要把公開可見等同於已授權修改／再散布。 |
+| 發佈門檻 | 公開權利與授權 | 原創程式碼已採 MIT，並加入 `LICENSE`、`THIRD_PARTY_NOTICES.md` 與第三方授權文字；授權文件已複製至 APK assets。兩個 PNG 圖示的創作來源與公開使用權利仍待確認，確認前不將其納入 MIT 授權。 |
 | 發佈門檻 | Library 手勢／回饋真機驗證 | 驗證長按一秒的按壓縮放、震動、星號脈衝與 Snackbar；再測左右拖曳與垂直捲動、手動排序手勢是否互不干擾。 |
 | 發佈門檻 | Analytics timeline 真機流暢度 | 連續左右拖曳時間線，確認拖曳過程只更新預覽、放開後才重載詳細統計，且沒有明顯掉幀。 |
 | 中 | 使用分析即時性 | 啟用時與排程匯入使用事件；頁面開啟時不保證立即匯入剛發生的外部 App 使用事件。可再評估手動 refresh 與更新時間提示。 |
@@ -38,9 +38,9 @@
 
 ## 建議 GitHub 節奏
 
-1. 將 v0.8.4 source candidate 提交到候選分支，先跑 CI / 本機 `testDebugUnitTest` 與 `assembleDebug`。
+1. 將 v0.8.4 source candidate 與 MIT／第三方授權文件提交到候選分支，先跑 CI / 本機 `testDebugUnitTest` 與 `assembleDebug`。
 2. 真機測試 Widget 單／雙排與所有寬度，再修正 Launcher 特例。
-3. 確認圖示授權、LICENSE、README 截圖與隱私說明後，再標記正式 tag。
+3. 確認兩個 PNG 圖示的權利、README 截圖與隱私說明後，再標記正式 tag。
 4. 若分享 APK，請從已驗證的同一 commit 產生並附 SHA-256 與測試裝置資訊。
 
 GitHub source 發佈與 Google Play 上架是不同流程；本文件只安排 source candidate 到正式 GitHub release 的門檻。

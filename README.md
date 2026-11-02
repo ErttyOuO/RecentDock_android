@@ -80,18 +80,20 @@ English summary: RecentDock is an Android app library and adaptive home-screen w
 
 ## 目前版本狀態
 
-目前整理的程式碼為 **v0.8.4 source candidate（versionCode 44）**。本版修正 Android 系統解除安裝權限宣告，加入 `REQUEST_DELETE_PACKAGES`（normal 權限，安裝時自動授予）。XML／資源一致性與部分 Kotlin source checks 已完成；但目前尚未取得可成功下載 Gradle 的建置環境，因此 **尚不能宣稱完整 Gradle build 或單元測試已通過**。正式發佈前仍需：
+目前整理的程式碼為 **v0.8.4 source candidate（versionCode 44）**。本版修正 Android 系統解除安裝權限宣告，加入 `REQUEST_DELETE_PACKAGES`（normal 權限，安裝時自動授予）。已在 Windows／JDK 17／SDK 36 環境完成 `:app:testDebugUnitTest` 與 `:app:assembleDebug`，29 項單元測試全部通過。正式發佈前仍需：
 
-1. 在可連網的 Android Studio 環境執行 `:app:testDebugUnitTest` 與 `:app:assembleDebug`。
+1. 在 Android 實機驗證解除安裝確認與取消流程。
 2. 在實機及至少兩種 Launcher 驗證 Widget 尺寸、欄數、分頁與分類切換。
-3. 驗證 Library 長按／左右滑動、Analytics timeline 拖曳及系統解除安裝的取消與確認流程。
-4. 確認 App 圖示素材的公開使用權利，並決定 repository 的正式授權方式。
+3. 驗證 Library 長按／左右滑動及 Analytics timeline 拖曳。
+4. 確認兩個 PNG 圖示素材的創作來源與公開使用權利。
 
 更多版本紀錄與已知限制請見 [`docs/`](docs/)。
 
 ## License
 
-目前尚未加入 LICENSE，因為程式碼授權方式尚未決定。公開 repository 不代表他人已取得使用、修改或再散布本程式碼的授權；請在公開前確認程式碼與圖示素材的權利，並選定適合的 LICENSE。
+RecentDock 原創程式碼與專案文件採用 [MIT License](LICENSE)。第三方函式庫及 Material Icons 依各自授權條款使用，詳見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+`recentdock_app_icon.png` 與 `recentdock_widget_all_icon.png` 的創作來源尚待確認；在確認前，這兩個 PNG 不包含在 MIT 授權範圍內，請勿將它們當作 MIT 素材再散布。
 
 ---
 
@@ -99,6 +101,6 @@ English summary: RecentDock is an Android app library and adaptive home-screen w
 
 RecentDock is an Android app library and home-screen widget built with Kotlin. It helps users find and launch recently installed, recently opened, and starred apps. It includes app search, pinning, hiding, manual ordering, app details, an adaptive RemoteViews widget, and optional local usage analytics.
 
-Build requirements: Android Studio, JDK 17, Android SDK 36. Minimum supported Android version: 8.0 (API 26). The current source candidate is v0.8.4 (versionCode 44), including the `REQUEST_DELETE_PACKAGES` manifest permission fix. A full Gradle build and on-device regression testing are still pending; see the status and release documents above before creating a formal release.
+Build requirements: Android Studio, JDK 17, Android SDK 36. Minimum supported Android version: 8.0 (API 26). The current source candidate is v0.8.4 (versionCode 44). Gradle build and 29 unit tests have passed; on-device regression testing remains pending.
 
-No LICENSE file is included yet. Do not assume that public visibility grants permission to use, modify, or redistribute this source.
+Original RecentDock source code and project documentation are licensed under MIT. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The two PNG artwork files are excluded from the MIT grant until their provenance is confirmed.
