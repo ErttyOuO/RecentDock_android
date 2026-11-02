@@ -1,0 +1,38 @@
+# Android / Gradle
+.gradle/
+.kotlin/
+.idea/
+**/build/
+local.properties
+.externalNativeBuild/
+.cxx/
+/captures/
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Signing material and local secrets
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+keystore.properties
+secrets.properties
+.env
+.env.*
+
+# IDE / OS / logs
+*.iml
+*.log
+.DS_Store
+Thumbs.db
+
+# Local backups and sync temporary files
+.tmp.driveupload/
+*.zip
