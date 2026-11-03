@@ -14,7 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
@@ -116,6 +116,7 @@ import com.example.recentdock.data.AppCategory
 import com.example.recentdock.data.AppIconCache
 import com.example.recentdock.data.AppSortMode
 import com.example.recentdock.data.CustomAppOrderStore
+import com.example.recentdock.data.ManualAppOrderDraft
 import com.example.recentdock.data.HiddenAppsStore
 import com.example.recentdock.data.PinnedAppsStore
 import com.example.recentdock.data.RecentApp
@@ -123,7 +124,6 @@ import com.example.recentdock.data.RecentAppsCache
 import com.example.recentdock.data.RecentAppsRepository
 import com.example.recentdock.data.StarredAppsStore
 import com.example.recentdock.data.UsageAccess
-import com.example.recentdock.data.movePackageInOrder
 import com.example.recentdock.data.sortedFor
 import com.example.recentdock.data.sortedForLibrary
 import com.example.recentdock.data.supportsHiddenApps
@@ -175,6 +175,8 @@ fun RecentDockLibraryScreen(
     var searchQuery by remember { mutableStateOf("") }
     var draggedPackage by remember { mutableStateOf<String?>(null) }
     var draggedOffsetY by remember { mutableStateOf(0f) }
+    var dragOrderDraft by remember { mutableStateOf<ManualAppOrderDraft?>(null) }
+    var dragCategory by remember { mutableStateOf<AppCategory?>(null) }
     var categoryTransitioning by remember { mutableStateOf(false) }
     var swipeDragOffsetX by remember { mutableFloatStateOf(0f) }
     val pageOffsetX = remember { Animatable(0f) }
@@ -229,9 +231,10 @@ fun RecentDockLibraryScreen(
     val sourceApps = snapshots[category].orEmpty()
     val hiddenPackages = hiddenByCategory[category].orEmpty()
 
-    // Keep any saved manual order healthy after package installs/removals without allowing a
-    // background snapshot refresh to overwrite the user's existing arrangement.
-    LaunchedEffect(sourceApps, category) {
+    // Keep saved manual order healthy after package changes, but never persist reconciliation
+    // while a drag draft is active; the gesture commits only from onDragEnd.
+    LaunchedEffect(sourceApps, category, dragCategory) {
+        if (dragCategory == category) return@LaunchedEffect
         if (customOrderStore.hasCustomOrder(category)) {
             val categoryDefault = sourceApps
                 .sortedFor(category, AppSortMode.CATEGORY_DEFAULT)
@@ -244,8 +247,12 @@ fun RecentDockLibraryScreen(
     }
 
     val customOrder = customOrders[category].orEmpty()
-    val orderedApps = remember(sourceApps, category, sortMode, pinnedPackages, customOrder) {
-        sourceApps.sortedForLibrary(category, sortMode, pinnedPackages, customOrder)
+    val previewOrder = dragOrderDraft
+        ?.takeIf { dragCategory == category }
+        ?.previewOrder
+    val activeCustomOrder = previewOrder ?: customOrder
+    val orderedApps = remember(sourceApps, category, sortMode, pinnedPackages, activeCustomOrder) {
+        sourceApps.sortedForLibrary(category, sortMode, pinnedPackages, activeCustomOrder)
     }
     val unhiddenApps = remember(orderedApps, hiddenPackages) {
         orderedApps.filterNot { it.packageName in hiddenPackages }
@@ -291,11 +298,30 @@ fun RecentDockLibraryScreen(
     fun resetDragState() {
         draggedPackage = null
         draggedOffsetY = 0f
+        dragOrderDraft = null
+        dragCategory = null
+    }
+
+    fun refreshWidget() {
+        scope.launch { runCatching { RecentAppsWidget().updateAll(appContext) } }
+    }
+
+    fun finishDrag(commit: Boolean) {
+        val targetCategory = dragCategory
+        val orderToCommit = if (commit) dragOrderDraft?.orderToCommit() else null
+        if (targetCategory != null && orderToCommit != null) {
+            customOrderStore.setOrder(targetCategory, orderToCommit)
+            customOrders = customOrders.toMutableMap().apply {
+                put(targetCategory, orderToCommit)
+            }
+            refreshWidget()
+        }
+        resetDragState()
     }
 
     fun refreshHiddenStateAndWidget() {
         hiddenByCategory = hiddenStore.getAll()
-        scope.launch { runCatching { RecentAppsWidget().updateAll(appContext) } }
+        refreshWidget()
     }
 
     // Pre-warm a small set of icons so category changes do not start with a burst of disk decodes.
@@ -500,6 +526,7 @@ fun RecentDockLibraryScreen(
                                                 put(category, emptyList())
                                             }
                                             resetDragState()
+                                            refreshWidget()
                                             sortExpanded = false
                                         },
                                     )
@@ -731,6 +758,7 @@ fun RecentDockLibraryScreen(
                                     pinnedStore.toggle(app.packageName)
                                     pinnedPackages = pinnedStore.getPinnedPackages()
                                     resetDragState()
+                                    refreshWidget()
                                 },
                                 onHide = {
                                     if (category.supportsHiddenApps()) {
@@ -766,11 +794,26 @@ fun RecentDockLibraryScreen(
                                         }
                                 },
                                 onDragStart = {
+                                    val displayedPackages = sourceApps
+                                        .sortedForLibrary(
+                                            category,
+                                            AppSortMode.CATEGORY_DEFAULT,
+                                            pinnedPackages,
+                                            customOrders[category].orEmpty(),
+                                        )
+                                        .map { it.packageName }
+                                    dragCategory = category
+                                    dragOrderDraft = ManualAppOrderDraft(displayedPackages)
                                     draggedPackage = app.packageName
                                     draggedOffsetY = 0f
                                 },
                                 onDrag = { deltaY ->
-                                    if (draggedPackage == app.packageName && canReorder) {
+                                    val draft = dragOrderDraft
+                                    if (draggedPackage == app.packageName &&
+                                        dragCategory == category &&
+                                        canReorder &&
+                                        draft != null
+                                    ) {
                                         draggedOffsetY += deltaY
                                         val layoutInfo = listState.layoutInfo
                                         val currentInfo = layoutInfo.visibleItemsInfo
@@ -793,30 +836,9 @@ fun RecentDockLibraryScreen(
 
                                             val targetPackage = targetInfo?.key as? String
                                             if (targetInfo != null && targetPackage != null) {
-                                                val defaultPackages = sourceApps
-                                                    .sortedFor(
-                                                        category,
-                                                        AppSortMode.CATEGORY_DEFAULT,
-                                                    )
-                                                    .map { it.packageName }
-                                                val currentPackages = if (
-                                                    customOrderStore.hasCustomOrder(category)
-                                                ) {
-                                                    customOrders[category].orEmpty()
-                                                        .ifEmpty { defaultPackages }
-                                                } else {
-                                                    defaultPackages
-                                                }
-                                                val moved = movePackageInOrder(
-                                                    currentPackages,
-                                                    app.packageName,
-                                                    targetPackage,
-                                                )
-                                                if (moved != currentPackages) {
-                                                    customOrderStore.setOrder(category, moved)
-                                                    customOrders = customOrders.toMutableMap().apply {
-                                                        put(category, moved)
-                                                    }
+                                                val movedDraft = draft.move(app.packageName, targetPackage)
+                                                if (movedDraft != draft) {
+                                                    dragOrderDraft = movedDraft
                                                     draggedOffsetY +=
                                                         (currentInfo.offset - targetInfo.offset).toFloat()
                                                 }
@@ -839,7 +861,8 @@ fun RecentDockLibraryScreen(
                                         }
                                     }
                                 },
-                                onDragEnd = { resetDragState() },
+                                onDragCancel = { finishDrag(commit = false) },
+                                onDragEnd = { finishDrag(commit = true) },
                             )
                         }
                     }
@@ -934,6 +957,7 @@ private fun RecentAppCard(
     onUninstall: () -> Unit,
     onDragStart: () -> Unit,
     onDrag: (Float) -> Unit,
+    onDragCancel: () -> Unit,
     onDragEnd: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -1049,6 +1073,7 @@ private fun RecentAppCard(
                     AppDragHandle(
                         onDragStart = onDragStart,
                         onDrag = onDrag,
+                        onDragCancel = onDragCancel,
                         onDragEnd = onDragEnd,
                     )
                 }
@@ -1264,23 +1289,25 @@ private fun LibrarySearchField(
 private fun AppDragHandle(
     onDragStart: () -> Unit,
     onDrag: (Float) -> Unit,
+    onDragCancel: () -> Unit,
     onDragEnd: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
     val currentOnDragStart by rememberUpdatedState(onDragStart)
     val currentOnDrag by rememberUpdatedState(onDrag)
+    val currentOnDragCancel by rememberUpdatedState(onDragCancel)
     val currentOnDragEnd by rememberUpdatedState(onDragEnd)
 
     Box(
         modifier = Modifier
             .size(34.dp)
             .pointerInput(Unit) {
-                detectDragGestures(
+                detectDragGesturesAfterLongPress(
                     onDragStart = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         currentOnDragStart()
                     },
-                    onDragCancel = currentOnDragEnd,
+                    onDragCancel = currentOnDragCancel,
                     onDragEnd = currentOnDragEnd,
                     onDrag = { change, dragAmount ->
                         change.consume()

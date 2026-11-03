@@ -14,12 +14,16 @@ import com.example.recentdock.analytics.AnalyticsLaunchActivity
 import com.example.recentdock.analytics.AnalyticsPreferences
 import com.example.recentdock.data.AppCategory
 import com.example.recentdock.data.AppIconCache
+import com.example.recentdock.data.AppSortMode
+import com.example.recentdock.data.CustomAppOrderStore
 import com.example.recentdock.data.HiddenAppsStore
+import com.example.recentdock.data.PinnedAppsStore
 import com.example.recentdock.data.RecentApp
 import com.example.recentdock.data.RecentAppsCache
 import com.example.recentdock.data.RecentAppsRepository
 import com.example.recentdock.data.UsageAccess
 import com.example.recentdock.data.WidgetPreferences
+import com.example.recentdock.data.sortedFor
 import com.example.recentdock.ui.RecentAppsActivity
 import com.example.recentdock.ui.UsageAccessActivity
 import kotlinx.coroutines.Dispatchers
@@ -74,9 +78,20 @@ class RecentAppsWidget {
 
         val hiddenPackages = HiddenAppsStore(context).getHiddenPackages(category)
         val rawApps = cache.get(category)
-        val apps = rawApps
-            .filterNot { it.packageName in hiddenPackages }
-            .take(preferences.displayCount.coerceAtMost(MAX_BROWSE_APPS))
+        val pinnedPackages = PinnedAppsStore(context).getPinnedPackages()
+        val customOrderStore = CustomAppOrderStore(context)
+        val defaultPackages = rawApps
+            .sortedFor(category, AppSortMode.CATEGORY_DEFAULT)
+            .map { it.packageName }
+        val customOrder = customOrderStore.reconcile(category, defaultPackages)
+        val apps = orderedAppsForWidget(
+            rawApps = rawApps,
+            category = category,
+            pinnedPackages = pinnedPackages,
+            customOrder = customOrder,
+            hiddenPackages = hiddenPackages,
+            displayCount = preferences.displayCount.coerceAtMost(MAX_BROWSE_APPS),
+        )
         val layoutSpec = layoutForOptions(manager.getAppWidgetOptions(widgetId))
 
         val pageCount = WidgetLayoutPolicy.pageCount(apps.size, layoutSpec.visibleSlots)

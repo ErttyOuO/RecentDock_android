@@ -3,17 +3,17 @@
 一款以 Kotlin 開發的 Android App 與主畫面小工具，協助快速整理、搜尋、啟動最近安裝與最近使用的 App，並提供收藏、釘選、隱藏、手動排序及可選擇啟用的本機使用分析。
 
 **GitHub repository name:** `RecentDock_android`  
-**Current source:** `v0.8.4` · **versionCode:** `44` · **Status:** Source candidate
+**Current source:** `v0.8.5` · **versionCode:** `45` · **Status:** Source candidate · **34 unit tests passing**
 
 English summary: RecentDock is an Android app library and adaptive home-screen widget for finding and launching apps, with local-only optional usage analytics.
 
 ## 功能特色
 
 - **App Library：** 整理最近安裝、最近開啟與收藏的 App，支援以 App 名稱或 package name 搜尋。
-- **管理與排序：** 收藏、釘選置頂、隱藏／復原、分類內拖曳排序，並可依最近使用時間排序。
+- **管理與排序：** 收藏、釘選置頂、隱藏／復原、分類內手動排序（長按拖曳把手、即時預覽、放開才儲存；取消會復原），並可依最近使用時間排序。
 - **App 詳細資訊：** 顯示 package name、安裝時間、最近開啟時間、RecentDock 啟動次數，並可跳轉 Android 系統 App 資訊頁。
 - **快速操作：** 長按約一秒即可收藏或取消收藏，提供按壓動畫、震動、星號動畫與 Snackbar 回饋。
-- **Adaptive Home-screen Widget：** 使用原生 `AppWidgetProvider` 與 `RemoteViews`；依小工具高度切換單排／雙排，寬度支援 2～5 欄及分頁。
+- **Adaptive Home-screen Widget：** 使用原生 `AppWidgetProvider` 與 `RemoteViews`；依小工具高度切換單排／雙排，寬度支援 2～5 欄及分頁，並同步 Library 的分類手動排序與釘選順序。
 - **Local Analytics：** 使用者可自行開啟每日、每週、每月使用分析；可單獨清除分析資料，不影響收藏、釘選、隱藏與排序。
 - **系統解除安裝：** 從 App 項目選單呼叫 Android 系統解除安裝確認流程，不執行靜默解除安裝。
 - **多語系：** English、繁體中文與簡體中文資源。
@@ -80,7 +80,7 @@ English summary: RecentDock is an Android app library and adaptive home-screen w
 
 ## 目前版本狀態
 
-目前整理的程式碼為 **v0.8.4 source candidate（versionCode 44）**。本版修正 Android 系統解除安裝權限宣告，加入 `REQUEST_DELETE_PACKAGES`（normal 權限，安裝時自動授予）。已在 Windows／JDK 17／SDK 36 環境完成 `:app:testDebugUnitTest` 與 `:app:assembleDebug`，29 項單元測試全部通過。正式發佈前仍需：
+目前整理的程式碼為 **v0.8.4 source candidate（versionCode 44）**。本版修正 Android 系統解除安裝權限宣告，加入 `REQUEST_DELETE_PACKAGES`（normal 權限，安裝時自動授予），並改善手動排序預覽／提交與 Widget 排序同步。已在原始專案及 GitHub 發布資料夾完成 `:app:testDebugUnitTest` 與 `:app:assembleDebug`，34 項單元測試全部通過。正式發佈前仍需：
 
 1. 在 Android 實機驗證解除安裝確認與取消流程。
 2. 在實機及至少兩種 Launcher 驗證 Widget 尺寸、欄數、分頁與分類切換。

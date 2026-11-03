@@ -31,3 +31,18 @@ internal fun movePackageInOrder(
         add(toIndex.coerceIn(0, size), moving)
     }
 }
+
+/**
+ * Holds an in-progress drag reorder without changing persisted state until the gesture commits.
+ */
+internal data class ManualAppOrderDraft(
+    val originalOrder: List<String>,
+    val previewOrder: List<String> = originalOrder,
+) {
+    fun move(fromPackage: String, toPackage: String): ManualAppOrderDraft {
+        val moved = movePackageInOrder(previewOrder, fromPackage, toPackage)
+        return if (moved == previewOrder) this else copy(previewOrder = moved)
+    }
+
+    fun orderToCommit(): List<String>? = previewOrder.takeIf { it != originalOrder }
+}
